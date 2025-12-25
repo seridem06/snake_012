@@ -2,12 +2,17 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Snake Game - 12 Niveles</title>
     <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
@@ -15,6 +20,7 @@
             min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             transition: background 0.5s ease;
+            overflow-x: hidden;
         }
 
         body.level-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
@@ -34,28 +40,35 @@
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 40px;
+            padding: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            max-width: 100%;
+            width: 100%;
         }
 
         h1 {
             color: white;
             text-align: center;
-            margin-bottom: 30px;
+            margin: 0 0 20px 0;
+            font-size: clamp(1.2rem, 4vw, 2rem);
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .grid-container {
-            display: inline-block;
-            padding: 20px;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(52, 12px);
             grid-gap: 3px;
+            margin: 0 auto;
         }
 
         .cell {
@@ -94,52 +107,221 @@
 
         .controls {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
         }
 
         button {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 10px 20px;
             border-radius: 25px;
-            font-size: 16px;
+            font-size: clamp(0.9rem, 3vw, 1rem);
             cursor: pointer;
-            margin: 0 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            touch-action: manipulation;
+            user-select: none;
         }
 
         button:active {
-            transform: translateY(0);
+            transform: scale(0.95);
+        }
+
+        /* Controles táctiles para móviles */
+        .touch-controls {
+            display: none; /* Oculto por defecto, se mostrará con JS solo en móviles */
+            margin-top: 20px;
+            width: 100%;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .touch-controls.show-mobile {
+            display: block;
+        }
+
+        .touch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 80px);
+            gap: 10px;
+        }
+
+        .touch-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 15px;
+            color: white;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        .touch-btn:active {
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0.95);
+        }
+
+        .touch-btn-up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .touch-btn-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .touch-btn-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .touch-btn-down {
+            grid-column: 2;
+            grid-row: 3;
         }
 
         .info {
             color: white;
             text-align: center;
-            margin-top: 20px;
-            font-size: 16px;
+            margin-top: 15px;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
             opacity: 0.9;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .keyboard-info {
+            display: block;
         }
 
         .stats {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-top: 15px;
         }
 
         .stat-item {
             background: rgba(255, 255, 255, 0.2);
-            padding: 10px 20px;
+            padding: 8px 15px;
             border-radius: 15px;
             font-weight: bold;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+        }
+
+        /* Media queries para móviles */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                padding: 15px;
+                border-radius: 15px;
+            }
+
+            h1 {
+                margin-bottom: 15px;
+            }
+
+            .grid-container {
+                padding: 5px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(52, 10px);
+                grid-gap: 2px;
+            }
+
+            .cell {
+                width: 10px;
+                height: 10px;
+            }
+
+            button {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+
+            .controls {
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: repeat(52, 8px);
+                grid-gap: 1.5px;
+            }
+
+            .cell {
+                width: 8px;
+                height: 8px;
+            }
+
+            .touch-grid {
+                grid-template-rows: repeat(3, 70px);
+            }
+
+            .touch-btn {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Landscape móvil */
+        @media (max-width: 900px) and (orientation: landscape) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.2rem;
+                margin-bottom: 10px;
+            }
+
+            .grid-container {
+                padding: 5px;
+            }
+
+            .info {
+                margin-top: 10px;
+            }
+
+            .stats {
+                gap: 5px;
+            }
+
+            .stat-item {
+                padding: 5px 10px;
+                font-size: 0.8rem;
+            }
+
+            .touch-controls {
+                margin-top: 10px;
+                max-width: 250px;
+            }
+
+            .touch-grid {
+                grid-template-rows: repeat(3, 60px);
+                gap: 5px;
+            }
         }
     </style>
 </head>
@@ -154,8 +336,20 @@
             <button onclick="pauseGame()">⏸️ Pausar</button>
             <button onclick="resetGame()">🔄 Reiniciar</button>
         </div>
+
+        <!-- Controles táctiles para móviles -->
+        <div class="touch-controls">
+            <div class="touch-grid">
+                <div class="touch-btn touch-btn-up" data-direction="up">⬆️</div>
+                <div class="touch-btn touch-btn-left" data-direction="left">⬅️</div>
+                <div class="touch-btn touch-btn-right" data-direction="right">➡️</div>
+                <div class="touch-btn touch-btn-down" data-direction="down">⬇️</div>
+            </div>
+        </div>
+
         <div class="info">
-            🎮 Usa las flechas del teclado: ⬆️ ⬇️ ⬅️ ➡️
+            <span class="keyboard-info">🎮 Usa las flechas del teclado: ⬆️ ⬇️ ⬅️ ➡️</span>
+            <span class="mobile-info"></span>
             <div class="stats">
                 <div class="stat-item">📊 Puntos: <span id="score">0</span></div>
                 <div class="stat-item">🐍 Longitud: <span id="length">4</span></div>
@@ -168,7 +362,7 @@
         const ROWS = 7;
         const COLS = 52;
         const MAX_LEVEL = 12;
-        const FOODS_PER_LEVEL = 10; // Comidas necesarias para pasar de nivel
+        const FOODS_PER_LEVEL = 10;
         
         let grid = [];
         let snake = [];
@@ -181,25 +375,13 @@
         let eatenCount = 0;
         let currentLevel = 1;
         let foodsEatenInLevel = 0;
-        let gameSpeed = 150; // Velocidad inicial en ms
+        let gameSpeed = 150;
 
-        // Velocidades por nivel (disminuye = más rápido)
         const LEVEL_SPEEDS = {
-            1: 150,
-            2: 135,
-            3: 120,
-            4: 105,
-            5: 90,
-            6: 80,
-            7: 70,
-            8: 60,
-            9: 50,
-            10: 45,
-            11: 40,
-            12: 35
+            1: 150, 2: 135, 3: 120, 4: 105, 5: 90, 6: 80,
+            7: 70, 8: 60, 9: 50, 10: 45, 11: 40, 12: 35
         };
 
-        // Inicializar grid
         function initGrid() {
             const gridElement = document.getElementById('grid');
             gridElement.innerHTML = '';
@@ -220,7 +402,6 @@
             }
         }
 
-        // Inicializar serpiente
         function initSnake() {
             snake = [
                 { row: 3, col: 0 },
@@ -237,15 +418,12 @@
             });
         }
 
-        // Generar comida en posición aleatoria
         function spawnFood() {
-            // Limpiar comida anterior si existe
             if (food) {
                 grid[food.row][food.col].hasFood = false;
                 grid[food.row][food.col].element.classList.remove('food');
             }
 
-            // Encontrar posiciones vacías
             let emptyPositions = [];
             for (let i = 0; i < ROWS; i++) {
                 for (let j = 0; j < COLS; j++) {
@@ -260,7 +438,6 @@
                 return;
             }
 
-            // Seleccionar posición aleatoria
             const randomIndex = Math.floor(Math.random() * emptyPositions.length);
             food = emptyPositions[randomIndex];
             
@@ -268,7 +445,6 @@
             grid[food.row][food.col].element.classList.add('food');
         }
 
-        // Actualizar estadísticas
         function updateStats() {
             document.getElementById('score').textContent = score;
             document.getElementById('eaten').textContent = eatenCount;
@@ -276,7 +452,6 @@
             document.getElementById('level-display').textContent = currentLevel;
         }
 
-        // Cambiar nivel
         function levelUp() {
             if (currentLevel >= MAX_LEVEL) {
                 gameOver('¡Completaste todos los 12 niveles! 🎉🏆', true);
@@ -287,10 +462,8 @@
             foodsEatenInLevel = 0;
             gameSpeed = LEVEL_SPEEDS[currentLevel];
             
-            // Cambiar color de fondo
             document.body.className = `level-${currentLevel}`;
             
-            // Mostrar mensaje de nivel
             pauseGame();
             setTimeout(() => {
                 alert(`🎊 ¡NIVEL ${currentLevel}! 🎊\n\n⚡ La serpiente es más rápida\n🎯 Come ${FOODS_PER_LEVEL} alimentos para avanzar\n\n¡Presiona OK para continuar!`);
@@ -298,82 +471,79 @@
             }, 300);
         }
 
-        // Controles del teclado
-        document.addEventListener('keydown', (e) => {
+        function handleDirection(direction) {
             if (!isPlaying) return;
             
-            switch(e.key) {
-                case 'ArrowUp':
-                    if (currentDirection !== 'down') {
-                        nextDirection = 'up';
-                    }
-                    e.preventDefault();
-                    break;
-                case 'ArrowDown':
-                    if (currentDirection !== 'up') {
-                        nextDirection = 'down';
-                    }
-                    e.preventDefault();
-                    break;
-                case 'ArrowLeft':
-                    if (currentDirection !== 'right') {
-                        nextDirection = 'left';
-                    }
-                    e.preventDefault();
-                    break;
-                case 'ArrowRight':
-                    if (currentDirection !== 'left') {
-                        nextDirection = 'right';
-                    }
-                    e.preventDefault();
-                    break;
+            const validMove = {
+                'up': currentDirection !== 'down',
+                'down': currentDirection !== 'up',
+                'left': currentDirection !== 'right',
+                'right': currentDirection !== 'left'
+            };
+
+            if (validMove[direction]) {
+                nextDirection = direction;
+            }
+        }
+
+        // Controles de teclado
+        document.addEventListener('keydown', (e) => {
+            const keyMap = {
+                'ArrowUp': 'up',
+                'ArrowDown': 'down',
+                'ArrowLeft': 'left',
+                'ArrowRight': 'right'
+            };
+
+            if (keyMap[e.key]) {
+                handleDirection(keyMap[e.key]);
+                e.preventDefault();
             }
         });
 
-        // Obtener siguiente posición
+        // Controles táctiles
+        document.querySelectorAll('.touch-btn').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const direction = btn.getAttribute('data-direction');
+                handleDirection(direction);
+            });
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const direction = btn.getAttribute('data-direction');
+                handleDirection(direction);
+            });
+        });
+
         function getNextPosition(current, direction) {
             let next = { ...current };
             
             switch (direction) {
-                case 'right':
-                    next.col++;
-                    break;
-                case 'down':
-                    next.row++;
-                    break;
-                case 'left':
-                    next.col--;
-                    break;
-                case 'up':
-                    next.row--;
-                    break;
+                case 'right': next.col++; break;
+                case 'down': next.row++; break;
+                case 'left': next.col--; break;
+                case 'up': next.row--; break;
             }
             
             return next;
         }
 
-        // Verificar colisión con bordes
         function isOutOfBounds(pos) {
             return pos.row < 0 || pos.row >= ROWS || pos.col < 0 || pos.col >= COLS;
         }
 
-        // Verificar colisión consigo misma
         function collidesWithSelf(pos) {
             return snake.some((segment, index) => 
                 index < snake.length - 1 && segment.row === pos.row && segment.col === pos.col
             );
         }
 
-        // Mover serpiente
         function moveSnake() {
             const head = snake[snake.length - 1];
-            
-            // Actualizar dirección
             currentDirection = nextDirection;
-            
             const next = getNextPosition(head, currentDirection);
             
-            // Verificar colisiones
             if (isOutOfBounds(next)) {
                 gameOver('¡Chocaste con el borde! 💥');
                 return;
@@ -384,27 +554,22 @@
                 return;
             }
             
-            // Añadir nueva cabeza
             snake.push(next);
             grid[next.row][next.col].hasSnake = true;
             grid[next.row][next.col].element.classList.add('snake');
             
-            // Verificar si comió la comida
             let ateFood = false;
             if (food && next.row === food.row && next.col === food.col) {
                 ateFood = true;
-                score += currentLevel * 10; // Más puntos en niveles superiores
+                score += currentLevel * 10;
                 eatenCount++;
                 foodsEatenInLevel++;
                 
-                // Limpiar comida
                 grid[food.row][food.col].hasFood = false;
                 grid[food.row][food.col].element.classList.remove('food');
                 
-                // Generar nueva comida
                 spawnFood();
                 
-                // Verificar si debe subir de nivel
                 if (foodsEatenInLevel >= FOODS_PER_LEVEL) {
                     levelUp();
                 }
@@ -412,7 +577,6 @@
                 updateStats();
             }
             
-            // Si no comió, eliminar la cola (la serpiente crece al comer)
             if (!ateFood) {
                 const tail = snake.shift();
                 grid[tail.row][tail.col].hasSnake = false;
@@ -422,7 +586,6 @@
             }
         }
 
-        // Game Over
         function gameOver(message, isWin = false) {
             pauseGame();
             setTimeout(() => {
@@ -432,7 +595,6 @@
             }, 300);
         }
 
-        // Controles del juego
         function startGame() {
             if (!isPlaying) {
                 isPlaying = true;
@@ -462,15 +624,28 @@
             updateStats();
         }
 
-        // Inicializar al cargar
         window.onload = function() {
+            // Detectar si es un dispositivo móvil real
+            const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+            
+            // Mostrar controles táctiles solo en dispositivos móviles
+            if (isMobile || (isTouchDevice && window.innerWidth <= 768)) {
+                document.querySelector('.touch-controls').classList.add('show-mobile');
+                document.querySelector('.keyboard-info').style.display = 'none';
+            }
+            
             document.body.className = 'level-1';
             initGrid();
             initSnake();
             spawnFood();
             updateStats();
             
-            alert('🎮 ¡SNAKE GAME - 12 NIVELES!\n\n⬆️⬇️⬅️➡️ Usa las flechas para moverte\n🍎 Come la comida para crecer\n📈 Come 10 alimentos por nivel\n⚡ Cada nivel es más rápido\n🎨 Los colores cambian en cada nivel\n\n¡Presiona JUGAR para comenzar!');
+            const controls = (isMobile || (isTouchDevice && window.innerWidth <= 768)) ? 
+                '📱 Usa los botones táctiles para moverte' : 
+                '⬆️⬇️⬅️➡️ Usa las flechas para moverte';
+            
+            alert(`🎮 ¡SNAKE GAME - 12 NIVELES!\n\n${controls}\n🍎 Come la comida para crecer\n📈 Come 10 alimentos por nivel\n⚡ Cada nivel es más rápido\n🎨 Los colores cambian en cada nivel\n\n¡Presiona JUGAR para comenzar!`);
         };
     </script>
 </body>
