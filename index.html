@@ -60,13 +60,11 @@
             padding: 10px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(52, 12px);
+            grid-template-columns: repeat(var(--cols, 52), 12px);
             grid-gap: 3px;
             margin: 0 auto;
         }
@@ -242,13 +240,13 @@
             }
 
             .grid {
-                grid-template-columns: repeat(52, 10px);
+                grid-template-columns: repeat(var(--cols, 52), 9px);
                 grid-gap: 2px;
             }
 
             .cell {
-                width: 10px;
-                height: 10px;
+                width: 9px;
+                height: 9px;
             }
 
             button {
@@ -263,13 +261,13 @@
 
         @media (max-width: 480px) {
             .grid {
-                grid-template-columns: repeat(52, 8px);
+                grid-template-columns: repeat(var(--cols, 52), 7px);
                 grid-gap: 1.5px;
             }
 
             .cell {
-                width: 8px;
-                height: 8px;
+                width: 7px;
+                height: 7px;
             }
 
             .touch-grid {
@@ -278,6 +276,18 @@
 
             .touch-btn {
                 font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .grid {
+                grid-template-columns: repeat(var(--cols, 52), 6px);
+                grid-gap: 1px;
+            }
+
+            .cell {
+                width: 6px;
+                height: 6px;
             }
         }
 
@@ -359,8 +369,8 @@
     </div>
 
     <script>
-        const ROWS = 7;
-        const COLS = 52;
+        let ROWS = 7;
+        let COLS = 52;
         const MAX_LEVEL = 12;
         const FOODS_PER_LEVEL = 10;
         
@@ -386,6 +396,20 @@
             const gridElement = document.getElementById('grid');
             gridElement.innerHTML = '';
             grid = [];
+            
+            // Ajustar columnas según el ancho de pantalla para móviles
+            if (window.innerWidth <= 400) {
+                COLS = 35; // Pantallas muy pequeñas
+            } else if (window.innerWidth <= 480) {
+                COLS = 40; // Pantallas pequeñas
+            } else if (window.innerWidth <= 768) {
+                COLS = 45; // Tablets y móviles grandes
+            } else {
+                COLS = 52; // Desktop
+            }
+            
+            // Actualizar la variable CSS
+            gridElement.style.setProperty('--cols', COLS);
 
             for (let i = 0; i < ROWS; i++) {
                 grid[i] = [];
